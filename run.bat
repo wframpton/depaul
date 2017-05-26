@@ -1,0 +1,1 @@
+java -classpath target\classes;sql\lib\hsqldb.jar edu.depaul.ipd.jdp.jpa.Main
