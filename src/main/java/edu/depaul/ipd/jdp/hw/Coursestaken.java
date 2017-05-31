@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -122,7 +124,8 @@ public class Coursestaken implements Serializable {
                 }
             }
         } catch (SQLException sql){
-            throw new RuntimeException(sql);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                                "Database Connection Issue");
         }
     }
     

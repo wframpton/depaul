@@ -17,72 +17,89 @@ import java.util.logging.Logger;
  */
 public class Main {
 
+    /** Checks to see if string is a numeric value.
+     *
+     * @param str
+     * @return True - If string is numeric.
+     *         False - If string is not numeric.
+     */
+    public static boolean isNumeric(String str) {
+    for (char c : str.toCharArray()) {
+        if (!Character.isDigit(c))
+            return false;
+    }
+    return true;
+}
+    
     /** This application populates the HSQL database from the student and 
      *  courses taken input data files, then calculates each student's GPA.
      * @param args
      */
     public static void main(String[] args){
         
+        try(Connection con = DbConnection.getConnection()){
+            
+        }catch (SQLException sql){
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,"Database Not Connected",sql);
+            System.exit(0);
+        }
+        
         String line;
         
         InputStream stream = null;
-                
-        try {
-            stream = Main.class.getClassLoader().getResourceAsStream("data/student.data");
+        stream = Main.class.getClassLoader().getResourceAsStream("data/student.data");
         
-            if(stream==null){
-                System.out.println("Student File Not Found");
-            }else{
-                BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+        if(stream==null){
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,"Student File Not Found");
+        }else{ 
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(stream))){
             
                 while((line = br.readLine()) != null) {
                     String[] tokens = line.split(";");
-
-                    //validate id is numeric before creating student object
-                    try{
-                        int studentId = Integer.valueOf(tokens[0]);
+                    
+                    if (isNumeric(tokens[0])){
+                        
+                        int studentId = Integer.valueOf(tokens[0]);  
                         Students student = new Students(studentId);
 
-                        student.setLastname(tokens[1]); //is there a way to calc position from table?
+                        student.setLastname(tokens[1]); 
                         student.setFirstname(tokens[2]);
                         //student.setGpa(null); //may check to see if student id already exists?
                         student.setGpa(null);
                         student.setPhonenumber(tokens[4]);
 
-                        System.out.println(student);
+                        //System.out.println(student);
 
                         student.add();
-
-                    }catch (NumberFormatException nbr){
-                        System.out.println("Invalid Student.Student Id");                        
+                    }else{
+                        Logger.getLogger(Main.class.getName()).log(Level.INFO,
+                                "Invalid Student Id, Student Record Not Added");
                     }
                 }
-                br.close();
-                stream.close();
-            } 
-        }catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+            }catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                        "Unable to read student input file", ex);
+            }finally{
+                //Make Sure Input Stream is Closed
+                try{stream.close();}catch (IOException ex){}
+            }
+
+        }
         
-        InputStream stream2 = null;
+        InputStream stream2 = Main.class.getClassLoader().getResourceAsStream("data/coursestaken.data");
         
-        try {
-            stream2 = Main.class.getClassLoader().getResourceAsStream("data/coursestaken.data");
-        
-            if(stream2==null){
-                System.out.println("Coursetaken File Not Found");
-            }else{
-                BufferedReader br2 = new BufferedReader(new InputStreamReader(stream2));
+        if(stream2==null){
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,"Coursetaken File Not Found");
+        }else{
+            try(BufferedReader br2 = new BufferedReader(new InputStreamReader(stream2))){
            
                 while((line = br2.readLine()) != null) {
                     String[] tokens = line.split(";");
 
-                    try{
-                        Integer studentId = Integer.valueOf(tokens[0]);
+                    if (isNumeric(tokens[0])){
+                        int studentId = Integer.valueOf(tokens[0]);
 
                         String courseId = tokens[1];
-
-                        //validate id is numeric before creating student object
 
                         Coursestaken course = new Coursestaken(studentId,courseId);
 
@@ -90,19 +107,22 @@ public class Main {
                         course.setCourseid(courseId); 
                         course.setGrade(tokens[2].charAt(0));
 
-                        System.out.println(course);
+                        //System.out.println(course);
 
                         course.add();
-                    }catch(NumberFormatException nbr){
-                        System.out.println("Invalid Coursetaken.Student Id");
-                        //throw new RuntimeException(nbr);
+                    }else{
+                        Logger.getLogger(Main.class.getName()).log(Level.INFO,
+                                "Invalid Student Id, CourseTaken Record Not Added");
                     }
                 }
-                br2.close();
-                stream2.close();
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+
+            }catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                        "Unable to read cousetaken input file", ex);
+            }finally{
+                //Make Sure Input Stream is Closed
+                try{stream2.close();}catch (IOException ex){}
+            } 
         }
         
         try(Connection con = DbConnection.getConnection()){
@@ -120,18 +140,17 @@ public class Main {
                     student.setFirstname(rs.getString(3));
                     student.setPhonenumber(rs.getString(5));
 
-                    try {
-                        avgGpa = student.calcAvgGpa();
-                        student.setGpa(avgGpa);
-                        System.out.println(student);
-                        student.updateGpa();
-                    } catch (ClassNotFoundException ex) {
-                        Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    avgGpa = student.calcAvgGpa();
+                    student.setGpa(avgGpa);
+                    //System.out.println(student);
+                    student.updateGpa();
+
                 }
             }
         } catch (SQLException sql){
-            throw new RuntimeException(sql);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                                "Database Connection Issue",sql);
+            //throw new RuntimeException(sql);
         }
     }
 }

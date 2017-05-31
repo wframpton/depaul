@@ -7,6 +7,8 @@ package edu.depaul.ipd.jdp.hw;
 
 import java.sql.*;
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -143,15 +145,16 @@ public class Students implements Serializable {
                 }
             }
         } catch (SQLException sql){
-            throw new RuntimeException(sql);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                                "Database Connection Issue");
+            //throw new RuntimeException(sql);
         }
     }
     
     /** updateGpa() - updates student item's GPA field on the HSQL Database
      *
-     *
      */
-    public void updateGpa(){
+    public void updateGpa(){ 
         
         try (Connection con = DbConnection.getConnection()){
 
@@ -170,7 +173,7 @@ public class Students implements Serializable {
 
                         stmt.executeUpdate(x);
 
-                        System.out.println("StudentId "+this.studentid+" Updated");
+                        System.out.println("StudentId "+this.studentid+" GPA Updated: " + this.gpa);
 
                     }
                 }else{
@@ -178,17 +181,16 @@ public class Students implements Serializable {
                 }
             }
         } catch (SQLException sql){
-            throw new RuntimeException(sql);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                                "Database Connection Issue");
         }
     }
     
     /** calcAvgGpa() - calculates student's GPA from cousestaken table 
      *                 on HSQL Database
      * @return returns calculated GPA value
-     * @throws ClassNotFoundException
      */
-    public Double calcAvgGpa() throws ClassNotFoundException {
-      
+    public Double calcAvgGpa(){ 
         Double results = 0.0;
         
         try (Connection con = DbConnection.getConnection()){
@@ -232,7 +234,8 @@ public class Students implements Serializable {
                 }
             }
         } catch (SQLException sql){
-            throw new RuntimeException(sql);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                                "Database Connection Issue");
         }
         
         return results;

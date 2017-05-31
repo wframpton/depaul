@@ -11,6 +11,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,11 +23,13 @@ public class DbConnection {
     /** Connects to database that is specified in the properties file.
      *
      * @return returns Connection
+     * @throws java.sql.SQLException
      */
-    public static Connection getConnection(){
+    public static Connection getConnection() throws SQLException{
         Properties props = new Properties();
         InputStream stream = null;
         Connection con = null;
+        
         try {
             stream = Main.class.getClassLoader().getResourceAsStream("db-config.properties");
             props.load(stream);
@@ -37,12 +41,14 @@ public class DbConnection {
                             props.getProperty("password"));
             
             if(con==null){
-                System.out.println("Database Not Connected");
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                                "Database Connection Error");
+                throw new SQLException();
             }
                 
         } catch (IOException | ClassNotFoundException | SQLException e) {
-            // TODO Auto-generated catch block
-            System.out.println("Database Not Connected");
+
+            throw new SQLException();
         }
         return con;
     }
