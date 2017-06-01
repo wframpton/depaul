@@ -1,5 +1,5 @@
 /*
- * Students Class
+ * Student Class
  * Author-Will Frampton
  * 
  */
@@ -9,60 +9,31 @@ import java.sql.*;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 
 /**
  *
  * @author wfram
  */
-@Entity
-@Table(name = "STUDENTS")
-@NamedQueries({
-    @NamedQuery(name = "Students.findAll", query = "SELECT s FROM Students s")
-    , @NamedQuery(name = "Students.findByStudentid", query = "SELECT s FROM Students s WHERE s.studentid = :studentid")
-    , @NamedQuery(name = "Students.findByLastname", query = "SELECT s FROM Students s WHERE s.lastname = :lastname")
-    , @NamedQuery(name = "Students.findByFirstname", query = "SELECT s FROM Students s WHERE s.firstname = :firstname")
-    , @NamedQuery(name = "Students.findByGpa", query = "SELECT s FROM Students s WHERE s.gpa = :gpa")
-    , @NamedQuery(name = "Students.findByPhonenumber", query = "SELECT s FROM Students s WHERE s.phonenumber = :phonenumber")})
 
-public class Students implements Serializable {
+
+public class Student implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Id
-    @Basic(optional = false)
-    @Column(name = "STUDENTID")
     private Integer studentid;
-    @Column(name = "LASTNAME")
     private String lastname;
-    @Column(name = "FIRSTNAME")
     private String firstname;
-    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Column(name = "GPA")
     private Double gpa;
-    @Column(name = "PHONENUMBER")
     private String phonenumber;
 
-    /**
-     *
-     */
-    public Students() {
-    }
-
-    /**
+    /** Constructor for Students
      *
      * @param studentid
      */
-    public Students(Integer studentid) {
+    public Student(Integer studentid) {
         this.studentid = studentid;
     }
     
-    /**
+    /** Constructor for Students
      *
      * @param studentid
      * @param lastname
@@ -70,7 +41,7 @@ public class Students implements Serializable {
      * @param gpa
      * @param phonenumber
      */
-    public Students(Integer studentid,String lastname,String firstname,
+    public Student(Integer studentid,String lastname,String firstname,
             Double gpa,String phonenumber) {
         
         this.studentid=studentid;
@@ -123,7 +94,7 @@ public class Students implements Serializable {
     /** add() - adds student to HSQL Database
      *
      */
-    public void add(){
+    public void add() throws RuntimeException{
         
         try (Connection con = DbConnection.getConnection()){
             
@@ -138,7 +109,7 @@ public class Students implements Serializable {
                     String sqlAddStudent = "INSERT INTO PUBLIC.STUDENTS " +
                             "(STUDENTID,LASTNAME,FIRSTNAME,GPA,PHONENUMBER) VALUES" +
                             " ("+this.studentid+",\'"+this.lastname+"\',\'"+this.firstname+
-                            "\',"+this.gpa+",\'"+this.phonenumber.substring(1).replace(") ","-")+"\')";
+                            "\',"+this.gpa+",\'"+this.phonenumber+"\')";
 
                     stmt.executeUpdate(sqlAddStudent);
                     System.out.println("StudentId "+this.studentid+" Added");
@@ -147,7 +118,7 @@ public class Students implements Serializable {
         } catch (SQLException sql){
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
                                 "Database Connection Issue");
-            //throw new RuntimeException(sql);
+            throw new RuntimeException(sql);
         }
     }
     
@@ -156,6 +127,8 @@ public class Students implements Serializable {
      */
     public void updateGpa(){ 
         
+        this.gpa = calcAvgGpa();
+               
         try (Connection con = DbConnection.getConnection()){
 
             if(con!=null){
@@ -190,7 +163,7 @@ public class Students implements Serializable {
      *                 on HSQL Database
      * @return returns calculated GPA value
      */
-    public Double calcAvgGpa(){ 
+    private Double calcAvgGpa(){ 
         Double results = 0.0;
         
         try (Connection con = DbConnection.getConnection()){
@@ -200,12 +173,12 @@ public class Students implements Serializable {
                 ResultSet rs = stmt.executeQuery("SELECT GRADE FROM PUBLIC.COUSESTAKEN" +
                             " WHERE STUDENTID =" + this.studentid);
 
-                double gpaSum = 0;
+                double gpaSum = 0.0;
                 int nbrOfClasses = 0;
 
                 while(rs.next()){
 
-                    double multiplier = 0;
+                    double multiplier = 0.0;
 
                     Character letterGrade = rs.getString(1).charAt(0);
 
@@ -251,10 +224,10 @@ public class Students implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Students)) {
+        if (!(object instanceof Student)) {
             return false;
         }
-        Students other = (Students) object;
+        Student other = (Student) object;
         if ((this.studentid == null && other.studentid != null) || (this.studentid != null && !this.studentid.equals(other.studentid))) {
             return false;
         }
