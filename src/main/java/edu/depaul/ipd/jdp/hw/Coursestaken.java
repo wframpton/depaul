@@ -1,7 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Coursestaken Class
+ * Author-Will Frampton
+ * 
  */
 package edu.depaul.ipd.jdp.hw;
 
@@ -11,57 +11,34 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Objects;
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- *
+ * Coursestaken Class
+ * Author-Will Frampton
  * @author wfram
  */
-@Entity
-@Table(name = "COUSESTAKEN")
-@NamedQueries({
-    @NamedQuery(name = "Cousestaken.findAll", query = "SELECT c FROM Cousestaken c")
-    , @NamedQuery(name = "Cousestaken.findById", query = "SELECT c FROM Cousestaken c WHERE c.id = :id")
-    , @NamedQuery(name = "Cousestaken.findByStudentid", query = "SELECT c FROM Cousestaken c WHERE c.studentid = :studentid")
-    , @NamedQuery(name = "Cousestaken.findByCourseid", query = "SELECT c FROM Cousestaken c WHERE c.courseid = :courseid")
-    , @NamedQuery(name = "Cousestaken.findByGrade", query = "SELECT c FROM Cousestaken c WHERE c.grade = :grade")})
 
 public class Coursestaken implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Id
-    @Basic(optional = false)
-    @Column(name = "ID")
+
     private Integer id;
-    @Basic(optional = false)
-    @Column(name = "STUDENTID")
     private int studentid;
-    @Basic(optional = false)
-    @Column(name = "COURSEID")
     private String courseid;
-    @Column(name = "GRADE")
     private Character grade;
 
-    /**
-     *
-     */
-    public Coursestaken() {
-    }
-
-    /**
+    /** Coursestaken Constructor
      *
      * @param studentid
      * @param courseid
+     * @param grade
      */
-    public Coursestaken(int studentid, String courseid) {
+    public Coursestaken(int studentid, String courseid,Character grade) {
         this.studentid = studentid;
         this.courseid = courseid;
+        this.grade = grade;
         this.id = this.hashCode();
     }
 
@@ -100,7 +77,7 @@ public class Coursestaken implements Serializable {
     /** add() - adds course taken item to COUSESTAKEN table on the HSQL database 
      *
      */
-    public void add(){
+    public void add() throws RuntimeException{
         
         try (Connection con = DbConnection.getConnection()){
             
@@ -122,6 +99,8 @@ public class Coursestaken implements Serializable {
                 }
             }
         } catch (SQLException sql){
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
+                                "Database Connection Issue");
             throw new RuntimeException(sql);
         }
     }
