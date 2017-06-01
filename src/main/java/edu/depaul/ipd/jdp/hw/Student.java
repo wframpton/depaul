@@ -1,8 +1,3 @@
-/*
- * Student Class
- * Author-Will Frampton
- * 
- */
 package edu.depaul.ipd.jdp.hw;
 
 import java.sql.*;
@@ -10,13 +5,14 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
+/** Student Class
  *
- * @author wfram
+ * @author wfram - Will Frampton
  */
 
-
 public class Student implements Serializable {
+    
+    private static final Logger LOGGER = Logger.getLogger(Student.class.getName());
 
     private static final long serialVersionUID = 1L;
     private Integer studentid;
@@ -25,7 +21,7 @@ public class Student implements Serializable {
     private Double gpa;
     private String phonenumber;
 
-    /** Constructor for Students
+    /** Constructor for Student
      *
      * @param studentid
      */
@@ -33,7 +29,7 @@ public class Student implements Serializable {
         this.studentid = studentid;
     }
     
-    /** Constructor for Students
+    /** Constructor for Student
      *
      * @param studentid
      * @param lastname
@@ -92,9 +88,9 @@ public class Student implements Serializable {
     }
     
     /** add() - adds student to HSQL Database
-     *
+     * @throws RuntimeException 
      */
-    public void add() throws RuntimeException{
+    public void add(){
         
         try (Connection con = DbConnection.getConnection()){
             
@@ -116,8 +112,7 @@ public class Student implements Serializable {
                 }
             }
         } catch (SQLException sql){
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
-                                "Database Connection Issue");
+            LOGGER.log(Level.SEVERE,"Database Connection Issue");
             throw new RuntimeException(sql);
         }
     }
@@ -154,8 +149,7 @@ public class Student implements Serializable {
                 }
             }
         } catch (SQLException sql){
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
-                                "Database Connection Issue");
+            LOGGER.log(Level.SEVERE,"Database Connection Issue");
         }
     }
     
@@ -207,8 +201,7 @@ public class Student implements Serializable {
                 }
             }
         } catch (SQLException sql){
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
-                                "Database Connection Issue");
+            LOGGER.log(Level.SEVERE,"Database Connection Issue");
         }
         
         return results;

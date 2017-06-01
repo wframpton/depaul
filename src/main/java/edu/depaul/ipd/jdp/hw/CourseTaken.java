@@ -1,8 +1,3 @@
-/*
- * Coursestaken Class
- * Author-Will Frampton
- * 
- */
 package edu.depaul.ipd.jdp.hw;
 
 import java.io.Serializable;
@@ -14,13 +9,14 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Coursestaken Class
- * Author-Will Frampton
- * @author wfram
+/** CourseTaken Class
+ *
+ * @author wfram Will Frampton
  */
 
-public class Coursestaken implements Serializable {
+public class CourseTaken implements Serializable {
+    
+    private static final Logger LOGGER = Logger.getLogger(CourseTaken.class.getName());
 
     private static final long serialVersionUID = 1L;
 
@@ -29,13 +25,13 @@ public class Coursestaken implements Serializable {
     private String courseid;
     private Character grade;
 
-    /** Coursestaken Constructor
+    /** Coursetaken Constructor
      *
      * @param studentid
      * @param courseid
      * @param grade
      */
-    public Coursestaken(int studentid, String courseid,Character grade) {
+    public CourseTaken(int studentid, String courseid,Character grade) {
         this.studentid = studentid;
         this.courseid = courseid;
         this.grade = grade;
@@ -75,9 +71,9 @@ public class Coursestaken implements Serializable {
     }
 
     /** add() - adds course taken item to COUSESTAKEN table on the HSQL database 
-     *
+     * @throws RuntimeException 
      */
-    public void add() throws RuntimeException{
+    public void add(){
         
         try (Connection con = DbConnection.getConnection()){
             
@@ -87,7 +83,7 @@ public class Coursestaken implements Serializable {
                         this.studentid+" AND COURSEID=\'"+this.courseid+"\'");
 
                 if (rs.next()){
-                    System.out.println("Course "+this.courseid+" for StudentId "+this.studentid+" Not Added - Already Exists");
+                    System.out.println("Course "+this.courseid+" For StudentId "+this.studentid+" Not Added - Already Exists");
                 }else{
 
                     String sqlAddCourseTaken = "INSERT INTO PUBLIC.COUSESTAKEN " +
@@ -99,8 +95,7 @@ public class Coursestaken implements Serializable {
                 }
             }
         } catch (SQLException sql){
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
-                                "Database Connection Issue");
+            LOGGER.log(Level.SEVERE,"Database Connection Issue");
             throw new RuntimeException(sql);
         }
     }
@@ -124,7 +119,7 @@ public class Coursestaken implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Coursestaken other = (Coursestaken) obj;
+        final CourseTaken other = (CourseTaken) obj;
         if (this.studentid != other.studentid) {
             return false;
         }

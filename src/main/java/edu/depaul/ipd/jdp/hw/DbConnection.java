@@ -1,8 +1,3 @@
-/*
- * DbConnection Class
- * Author-Will Frampton
- * 
- */
 package edu.depaul.ipd.jdp.hw;
 
 import java.io.IOException;
@@ -14,11 +9,13 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
+/** DbConnection Class
  *
- * @author wfram
+ * @author wfram Will Frampton
  */
 public class DbConnection {
+    
+    private static final Logger LOGGER = Logger.getLogger(DbConnection.class.getName());
     
     /** Connects to database that is specified in the properties file.
      *
@@ -41,14 +38,13 @@ public class DbConnection {
                             props.getProperty("password"));
             
             if(con==null){
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
-                                "Database Connection Error");
+                LOGGER.log(Level.SEVERE,"Database Connection Error");
                 throw new SQLException();
             }
                 
         } catch (IOException | ClassNotFoundException | SQLException e) {
 
-            throw new SQLException();
+            throw new SQLException(e);
         }
         return con;
     }
