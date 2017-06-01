@@ -11,7 +11,7 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
+/** 
  * Created by Will Frampton
  * @author wfram
  */
@@ -32,6 +32,8 @@ public class Main {
         return true;
     }
     
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    
     /** This application populates the HSQL database from the student and 
      *  courses taken input data files, then calculates each student's GPA.
      * @param args
@@ -39,20 +41,20 @@ public class Main {
     public static void main(String[] args){
         
         String line;
+        int recordsAdded=0;
         
         InputStream stream = null;
         stream = Main.class.getClassLoader().getResourceAsStream("data/student.data");
         
         if(stream==null){
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,"Student File Not Found");
+            LOGGER.log(Level.SEVERE,"Student File Not Found");
         }else{ 
             try (BufferedReader br = new BufferedReader(new InputStreamReader(stream))){
             
                 while((line = br.readLine()) != null) {
                     String[] tokens = line.split(";");
                     if (tokens.length!=5){    //Expecting 5 columns
-                        Logger.getLogger(Main.class.getName()).log(Level.INFO,
-                                "Invalid Number of Input Fields");
+                        LOGGER.log(Level.INFO,"Invalid Number Of Input Fields For Student File");
                     }else{
                     
                         if (isNumeric(tokens[0])){
@@ -62,9 +64,8 @@ public class Main {
 
                             student.setLastname(tokens[1]); 
                             student.setFirstname(tokens[2]);
-                            
+                            //Leave gpa null and only let the calcAvg() method populate the field
                             String phoneNumber = tokens[4];
-                       
                             phoneNumber=phoneNumber.trim().replaceAll("[^\\d]","");
                             
                             if(phoneNumber.length()==10 && isNumeric(phoneNumber)){
@@ -75,33 +76,35 @@ public class Main {
                                 
                                 try{
                                     student.add();
+                                    recordsAdded++;
                                 }catch(RuntimeException ex){
                                     System.exit(1);
                                 }
                             }else{
-                                Logger.getLogger(Main.class.getName()).log(Level.INFO,
-                                    "Invalid Phone Number, Student Record Not Added");
+                                LOGGER.log(Level.INFO,"Invalid Phone Number, Student Record Not Added");
                             }
                         }else{
-                            Logger.getLogger(Main.class.getName()).log(Level.INFO,
-                                    "Invalid Student Id, Student Record Not Added");
+                            LOGGER.log(Level.INFO,"Invalid Student Id, Student Record Not Added");
                         }
                     }
                 }
             }catch (IOException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
-                        "Unable to read student input file", ex);
+                LOGGER.log(Level.SEVERE,"Unable To Read Student Input File", ex);
             }finally{
                 //Make Sure Input Stream is Closed
                 try{stream.close();}catch (IOException ex){}
             }
-
         }
+        if(recordsAdded==0){
+            LOGGER.log(Level.INFO,"No Records Added For Student Input File");
+        }
+        
+        recordsAdded=0; //Re-initialize records Added Counter
         
         InputStream stream2 = Main.class.getClassLoader().getResourceAsStream("data/coursestaken.data");
         
         if(stream2==null){
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,"Coursetaken File Not Found");
+            LOGGER.log(Level.SEVERE,"CoursesTaken File Not Found");
         }else{
             try(BufferedReader br2 = new BufferedReader(new InputStreamReader(stream2))){
            
@@ -109,8 +112,7 @@ public class Main {
                     String[] tokens = line.split(";");
 
                     if (tokens.length!=3){    //Expecting 3 tokens/columns
-                        Logger.getLogger(Main.class.getName()).log(Level.INFO,
-                                "Invalid Number of Input Fields");
+                        LOGGER.log(Level.INFO,"Invalid Number Of Input Fields For CoursesTaken Ffile");
                     }else{
                         if (isNumeric(tokens[0])){
                             int studentId = Integer.valueOf(tokens[0]);
@@ -119,16 +121,14 @@ public class Main {
                             Character letterGrade;
                             
                             if(grade.length()!=1){
-                                Logger.getLogger(Main.class.getName()).log(Level.INFO,
-                                    "Invalid Grade, CourseTaken Record Not Added");
+                                LOGGER.log(Level.INFO,"Invalid Grade, CoursesTaken Record Not Added");
                             }else{
                                 letterGrade = grade.charAt(0);
                                 
                                 if(letterGrade < 'A' || letterGrade > 'F' || letterGrade == 'E'){
-                                    Logger.getLogger(Main.class.getName()).log(Level.INFO,
-                                    "Invalid Grade, CourseTaken Record Not Added");
+                                    LOGGER.log(Level.INFO,"Invalid Grade, CoursesTaken Record Not Added");
                                 }else{
-                                    Coursestaken course = new Coursestaken(studentId,courseId,letterGrade);
+                                    CourseTaken course = new CourseTaken(studentId,courseId,letterGrade);
                                     
                                     try{
                                         course.add();
@@ -138,19 +138,20 @@ public class Main {
                                 }
                             }
                         }else{
-                            Logger.getLogger(Main.class.getName()).log(Level.INFO,
-                                    "Invalid Student Id, CourseTaken Record Not Added");
+                            LOGGER.log(Level.INFO,"Invalid Student Id, CoursesTaken Record Not Added");
                         }
                     }
                 }
 
             }catch (IOException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
-                        "Unable to read cousetaken input file", ex);
+                LOGGER.log(Level.SEVERE,"Unable To Read Coursestaken Input File", ex);
             }finally{
                 //Make Sure Input Stream is Closed
                 try{stream2.close();}catch (IOException ex){}
             } 
+        }
+        if(recordsAdded==0){
+            LOGGER.log(Level.INFO,"No Records Added For Coursestaken Input File");
         }
         
         try(Connection con = DbConnection.getConnection()){
@@ -172,9 +173,8 @@ public class Main {
                 }
             }
         } catch (SQLException sql){
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE,
-                                "Database Connection Issue",sql);
-            System.exit(1);
+            LOGGER.log(Level.SEVERE,"Database Connection Issue",sql);
+            System.exit(1);  //Exit with Error just in case more logic is added
         }
     }
 }
